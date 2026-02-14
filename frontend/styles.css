@@ -1,0 +1,204 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+header {
+    text-align: center;
+    width: 100%;
+    padding: 15px 0;
+    border-bottom: 4px;
+    border: 2px solid #00f2ff;
+} 
+
+body {
+    background: #0b0e14;
+    font-family: 'Exo 2', sans-serif;
+    background-image: 
+        linear-gradient(90deg, rgba(0, 242, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(rgba(0, 242, 255, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+h1 {
+    text-shadow: 0 0 10px rgba(0, 242, 255, 0.7);
+
+}
+
+.container{
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 40px;
+    padding: 20px;
+    flex: 1;
+    width: 100%;
+    margin: 0 auto;
+}
+#itemsTable{
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+ }
+
+th{
+    padding: 20px;
+    border-bottom: 1px solid #444;
+    color: #00f2ff;
+ }
+
+ tr:hover { 
+    background: rgba(0, 242, 255, 0.05); 
+}
+ 
+td{
+    padding: 10px;
+    border-bottom: 1px solid #444;
+}
+
+.field{
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+ }
+
+.buttons button:hover{
+    cursor: pointer;
+    background-color: #00f2ff;
+    color: #000;
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.7);
+}
+
+.buttons button{
+    font-family: 'Exo 2', sans-serif;
+    border-radius: 4px;
+    padding: 10px 20px;
+    background-color: #00f2ff;
+    margin-right: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+label{
+    color: rgba(255, 255, 255, 0.6);
+}
+
+textarea{
+    resize: vertical;
+}
+
+input, select, textarea {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(0, 242, 255, 0.2);
+    padding: 10px;
+    color: #fff;
+    border-radius: 4px;
+}
+
+.error-text {
+    color: #ff4d4d;
+    font-size: 0.8rem;
+    margin-top: 4px;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #00f2ff;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 242, 255, 0.5);
+}
+
+footer{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 auto;
+    margin-top: auto;
+    width: 100%;
+    padding: 15px 0;
+    border-bottom: 4px;
+    border: 2px solid #00f2ff;
+    gap: 10px;
+}
+
+a {
+    color: #00f2ff;
+}
+
+a:hover{
+    text-decoration: none;
+    color: #fff;
+    text-shadow: 0 0 5px #fff;
+}
+section h2 {
+    margin-bottom: 15px;
+    color: #00f2ff;
+}
+
+header, footer {
+    background: rgba(22, 27, 34, 0.95);
+}
+
+td, th, input, select, textarea, .count {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.9rem;
+}
+
+h1, h2 {
+    font-family: 'Exo 2', sans-serif;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+#avatar{
+    border-radius: 50%;
+}
+
+select option {
+    background-color: #0b0e14;
+    color: #fff;
+}
+input[type="date"]::-webkit-calendar-picker-indicator{
+    cursor: pointer;
+    color-scheme: dark;
+}
+
+select{
+    cursor: pointer;
+}
+
+.Support {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    margin: 2px;
+    gap: 10px;
+}
+
+#warning{
+    color: #ff4d4d;
+    font-size:larger;
+}
+
+.editBtn, .deleteBtn, .sortBtn{ 
+    font-family: 'Exo 2', sans-serif;
+    border-radius: 4px;
+    padding: 10px 20px;
+    background-color: #00f2ff;
+    margin-right: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.editBtn:hover, .deleteBtn:hover, .sortBtn:hover{
+    cursor: pointer;
+    background-color: #00f2ff;
+    color: #000;
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.7);
+}
