@@ -1,0 +1,42 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Cybersecurity Incident Tracker API",
+    "version": "1.0.0",
+    "description": "Документація API для лабораторної роботи №2 (Андрій Нижник)"
+  },
+  "servers": [{ "url": "http://localhost:3000" }],
+  "paths": {
+    "/api/incidents": {
+      "get": {
+        "summary": "Отримати список інцидентів",
+        "parameters": [
+          { "name": "tag", "in": "query", "schema": { "type": "string" }, "description": "Фільтр за типом" },
+          { "name": "sortBy", "in": "query", "schema": { "type": "string" }, "description": "Сортування (напр. date)" }
+        ],
+        "responses": { "200": { "description": "Успіх" } }
+      },
+      "post": {
+        "summary": "Створити новий інцидент",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "date": { "type": "string", "example": "2026-03-03" },
+                  "tag": { "type": "string" },
+                  "criticality": { "type": "string" },
+                  "reporter": { "type": "string" },
+                  "comment": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Створено" }, "400": { "description": "Помилка валідації" } }
+      }
+    }
+  }
+}

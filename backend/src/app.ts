@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import swaggerUi from 'swagger-ui-express';
+import swaggerDocument from './swagger.json';
 import incidentsRoutes from "./routes/incidents.routes";
 import { loggingMiddleware } from "./middleware/logging.middleware";
 import { errorHandler } from "./middleware/error-handler.middleware";
@@ -18,3 +20,5 @@ app.use(errorHandler);
 app.listen(3000, () => {
   console.log("API started on http://localhost:3000");
 });
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));

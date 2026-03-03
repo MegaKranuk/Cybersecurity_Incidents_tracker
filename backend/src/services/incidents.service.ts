@@ -3,7 +3,17 @@ import { IncidentsRepository } from "../repositories/incidents.repository";
 import {
   CreateIncidentRequestDto,
   UpdateIncidentRequestDto,
+  IncidentResponseDto
 } from "../dtos/incidents.dto";
+
+interface IncidentQuery {
+  tag?: string;
+  criticality?: string;
+  sortBy?: keyof IncidentResponseDto;
+  sortDir?: "asc" | "desc";
+  page?: string;
+  pageSize?: string;
+}
 
 const allowedCriticality = [
   "Низька критичність",
@@ -16,7 +26,8 @@ const allowedCriticality = [
 export class IncidentsService {
   constructor(private repo: IncidentsRepository) {}
 
-  getAll(query: any) {
+
+  getAll(query: IncidentQuery) {
     let data = this.repo.findAll();
 
     if (query.tag) {
@@ -29,9 +40,13 @@ export class IncidentsService {
 
     if (query.sortBy) {
       const dir = query.sortDir === "desc" ? -1 : 1;
-      data.sort((a: any, b: any) =>
-        a[query.sortBy] > b[query.sortBy] ? dir : -dir
-      );
+      const field = query.sortBy;
+      
+      data.sort((a, b) => {
+        if (a[field] > b[field]) return dir;
+        if (a[field] < b[field]) return -dir;
+        return 0;
+      });
     }
 
     const page = Number(query.page) || 1;
@@ -70,7 +85,7 @@ export class IncidentsService {
   }
 
   private validate(dto: CreateIncidentRequestDto) {
-    const errors = [];
+    const errors: string[] = [];
 
     if (!dto.date) errors.push("Date required");
     if (!dto.reporter || dto.reporter.length < 5)
