@@ -7,6 +7,9 @@ let currentSortAsc = true;
 const form = document.getElementById("createForm");
 const tableBody = document.getElementById ('itemsTableBody');
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const tagError = document.getElementById('tagError');
+const criticalityError = document.getElementById('criticalityError');
+const commentError = document.getElementById('commentError');
 
 
 const criticalityOrder = {
@@ -31,7 +34,9 @@ const dateError = document.getElementById ('dateError');
 const reporterError = document.getElementById ('reporterError');
 
 async function loadIncidents() {
-  const res = await fetch("http://localhost:3000/api/incidents");
+  const res = await fetch("http://localhost:3000/api/incidents", {
+      cache: "no-store" 
+  });
   const data = await res.json();
   incidents = data.items;
   render();
@@ -52,7 +57,7 @@ async function createIncident(incident) {
       throw new Error(`Помилка ${res.status}: Некоректні дані`);
   }
 
-  loadIncidents();
+  await loadIncidents();
 }
 
 async function updateIncident(id, incident) {
@@ -68,7 +73,7 @@ async function updateIncident(id, incident) {
       throw new Error(`Помилка ${res.status} при оновленні`);
   }
 
-  loadIncidents();
+  await loadIncidents();
 }
 
 async function deleteIncident(id) {
@@ -76,7 +81,7 @@ async function deleteIncident(id) {
     method: "DELETE"
   });
 
-  loadIncidents();
+  await loadIncidents();
 }
 
 function sanitize(str) {

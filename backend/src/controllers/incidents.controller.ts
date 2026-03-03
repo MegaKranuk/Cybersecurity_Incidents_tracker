@@ -1,36 +1,37 @@
 import { Request, Response } from "express";
 import { IncidentsService } from "../services/incidents.service";
+import { IncidentResponseDto } from "../dtos/incidents.dto";
 
 export class IncidentsController {
   constructor(private service: IncidentsService) {}
 
   getAll = (req: Request, res: Response) => {
-    const query = {
-      tag: typeof req.query.tag === "string" ? req.query.tag : undefined,
-      criticality:
-        typeof req.query.criticality === "string"
-          ? req.query.criticality
-          : undefined,
-      sortBy:
-        typeof req.query.sortBy === "string"
-          ? req.query.sortBy
-          : undefined,
-      sortDir:
-        typeof req.query.sortDir === "string"
-          ? req.query.sortDir
-          : undefined,
-      page:
-        typeof req.query.page === "string"
-          ? req.query.page
-          : undefined,
-      pageSize:
-        typeof req.query.pageSize === "string"
-          ? req.query.pageSize
-          : undefined,
-    };
+      const query = {
+        tag: typeof req.query.tag === "string" ? req.query.tag : undefined,
+        criticality:
+          typeof req.query.criticality === "string"
+            ? req.query.criticality
+            : undefined,
+        sortBy:
+          typeof req.query.sortBy === "string"
+            ? (req.query.sortBy as keyof IncidentResponseDto)
+            : undefined,
+        sortDir:
+          typeof req.query.sortDir === "string"
+            ? (req.query.sortDir as "asc" | "desc")
+            : undefined,
+        page:
+          typeof req.query.page === "string"
+            ? req.query.page
+            : undefined,
+        pageSize:
+          typeof req.query.pageSize === "string"
+            ? req.query.pageSize
+            : undefined,
+      };
 
-    res.json(this.service.getAll(query));
-  };
+      res.json(this.service.getAll(query));
+    };
 
   getById = (req: Request, res: Response) => {
     res.json(this.service.getById(String(req.params.id)));

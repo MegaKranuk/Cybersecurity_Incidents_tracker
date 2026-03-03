@@ -13,7 +13,7 @@ export class IncidentsRepository {
   }
 
   create(data: Omit<IncidentResponseDto, "id">) {
-    const incident: IncidentResponseDto = { id: uuid(), ...data };
+    const incident: IncidentResponseDto = { ...data, id: uuid() };
     this.incidents.set(incident.id, incident);
     return incident;
   }
