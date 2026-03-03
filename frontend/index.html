@@ -49,12 +49,12 @@
                         <select id="criticalitySelect" name="criticality" required>
                             <option value="">...</option>
                             <option value="Низька критичність">Низька критичність</option>
-                            <option value="Трохи критичн">Трохи критично</option>
+                            <option value="Трохи критично">Трохи критично</option>
                             <option value="Середня критичність">Середня критичність</option>
                             <option value="Відчутна критичність">Відчутна критичність</option>
                             <option value="Дуже критично">Дуже критично</option>
                         </select>
-                            <p class="error-text" id="CriticalityError"></p>
+                            <p class="error-text" id="criticalityError"></p>
                     </div>
 
                     <div class="field">
@@ -79,32 +79,15 @@
                 <button onclick="sortByDate()" class="sortBtn">
                     Сортувати за датою
                     <span>⬇</span>
-                </button>
-                <select onchange="filterByTag(this.value)">
-                        <option value="">Всі типи загроз</option>
-                        <option value="Шкідливе ПЗ">Шкідливе ПЗ</option>
-                        <option value="Фішинг">Фішинг</option>
-                        <option value="DDoS-атака">DDoS-атака</option>
-                        <option value="Вірус-вимагач">Вірус-вимагач</option>
-                        <option value="Троян">Троян</option>
-                        <option value="SQL/XSS">Атака на вебзастосунки (SQL/XSS)</option>
-                </select>
-                    <select onchange="filterByCriticality(this.value)">
-                        <option value="">Будь-яка критичність</option>
-                        <option value="Низька критичність">Низька критичність</option>
-                        <option value="Трохи критичн">Трохи критично</option>
-                        <option value="Середня критичність">Середня критичність</option>
-                        <option value="Відчутна критичність">Відчутна критичність</option>
-                        <option value="Дуже критично">Дуже критично</option>
-                </select>        
+                </button>    
                 <table id="itemsTable">
                     <caption>Зареєстровані кіберінциденти</caption>
                     <thead>
                         <tr>
-                            <th>Порядковий номер</th>
-                            <th>Дата</th>
-                            <th>Тип</th>
-                            <th>Критичність</th>
+                            <th>Порядковий номер</th>                        
+                            <th data-field="date">Дата <span>⬍</span></th>
+                            <th data-field="tag">Тип <span>⬍</span></th>
+                            <th data-field="criticality">Критичність <span>⬍</span></th>
                             <th>Репортер</th>
                             <th>Опис</th>
                         </tr>

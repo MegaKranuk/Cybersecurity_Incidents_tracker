@@ -1,8 +1,21 @@
-let incidents = JSON.parse(localStorage.getItem("incidents"))|| [];
+let incidents = [];
 let editId = null;
+
+let currentSortField = null;
+let currentSortAsc = true;
 
 const form = document.getElementById("createForm");
 const tableBody = document.getElementById ('itemsTableBody');
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+
+const criticalityOrder = {
+    "Низька критичність": 1,
+    "Трохи критично": 2,
+    "Середня критичність": 3,
+    "Відчутна критичність": 4,
+    "Дуже критично": 5
+};
 
 const dateField = document.getElementById('dateInput');
 
@@ -17,14 +30,61 @@ const commentField = document.getElementById('commentInput');
 const dateError = document.getElementById ('dateError');
 const reporterError = document.getElementById ('reporterError');
 
+async function loadIncidents() {
+  const res = await fetch("http://localhost:3000/api/incidents");
+  const data = await res.json();
+  incidents = data.items;
+  render();
+}
+
+async function createIncident(incident) {
+  const res = await fetch("http://localhost:3000/api/incidents", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(incident)
+  });
+
+  if (!res.ok) {
+      const errorData = await res.json();
+      console.error("Деталі помилки від сервера:", errorData);
+      throw new Error(`Помилка ${res.status}: Некоректні дані`);
+  }
+
+  loadIncidents();
+}
+
+async function updateIncident(id, incident) {
+  const res = await fetch(`http://localhost:3000/api/incidents/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(incident)
+  });
+
+  if (!res.ok) {
+      throw new Error(`Помилка ${res.status} при оновленні`);
+  }
+
+  loadIncidents();
+}
+
+async function deleteIncident(id) {
+  await fetch(`http://localhost:3000/api/incidents/${id}`, {
+    method: "DELETE"
+  });
+
+  loadIncidents();
+}
+
 function sanitize(str) {
     return str
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
 }
-
-
 
 function render(list = incidents){
     tableBody.innerHTML = "";
@@ -52,14 +112,10 @@ function render(list = incidents){
                 <button data-id = "${incident.id}" class = "deleteBtn">Видалити</button>
             </td>
         </tr>
-    `; 
-    tableBody.innerHTML += row;
-
-
-
+        `; 
+        tableBody.innerHTML += row;
     });
 
-    localStorage.setItem("incidents", JSON.stringify(incidents));
 }
 
 function validate(){
@@ -72,6 +128,20 @@ function validate(){
         dateError.innerText = "";
     }
 
+    if(tagField.value === ""){
+        tagError.innerText = "Виберіть тип!";
+        isValid = false;
+    } else {
+        tagError.innerText = "";
+    }
+
+    if(criticalityField.value === ""){
+        criticalityError.innerText = "Виберіть критичність!";
+        isValid = false;
+    } else {
+        criticalityError.innerText = "";
+    }
+
     if(reporterField.value.length < 5){
         reporterError.innerText = "Ім'я мінімум 5 символів!";
         isValid = false;
@@ -79,16 +149,25 @@ function validate(){
         reporterError.innerText = "";
     }
 
+    if(commentField.value.length < 15){
+        commentError.innerText = "Опис мінімум 15 символів!";
+        isValid = false;
+    } else {
+        commentError.innerText = "";
+    }
+
     return isValid;
 }
 
-form.addEventListener("submit", function(e){
+form.addEventListener("submit", async function(e){
     e.preventDefault();
 
-    if (!validate()) return;
+    if (!validate()) {
+        console.log("Валідація не пройдена.");
+        return;
+    }
 
     const data = {
-        id: editId || Date.now(),
         date: dateField.value,
         tag: tagField.value,
         criticality: criticalityField.value,
@@ -96,31 +175,47 @@ form.addEventListener("submit", function(e){
         comment: commentField.value
     };
 
-    if (editId){
-        incidents = incidents.map(item =>
-            item.id === editId ? data: item
-        );
-        editId = null;
-    } else {
-        incidents.push(data);
-    }
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerText; 
+    
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Відправка ...";
 
-    render();
-    form.reset();
-    reporterField.focus(); 
+    try {
+        console.log("Чекаємо 2 секунди перед відправкою...");
+        
+        await sleep(2000); 
+
+        if (editId) {
+            await updateIncident(editId, data);
+            editId = null;
+        } else {
+            await createIncident(data);
+        }
+
+        form.reset();
+        reporterField.focus(); 
+        console.log("Успішно збережено!");
+
+    } catch (error) {
+        console.error("Помилка при роботі з сервером:", error);
+        alert("Помилка з'єднання з сервером.");
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = originalText;
+    }
 });
 
-tableBody.addEventListener ("click", function(e){
-    const id = Number(e.target.dataset.id);
+tableBody.addEventListener("click", async function(e){
+    const id = e.target.dataset.id; 
     if (!id) return;
 
     if (e.target.classList.contains("deleteBtn")){
-        incidents = incidents.filter(item => item.id !== id);
-        render()
+        await deleteIncident(id); 
     }
 
     if (e.target.classList.contains("editBtn")){
-        const item = incidents.find(i => i.id === id);
+        const item = incidents.find(i => i.id == id); 
 
         dateField.value = item.date;
         tagField.value = item.tag;
@@ -128,7 +223,7 @@ tableBody.addEventListener ("click", function(e){
         reporterField.value = item.reporter;
         commentField.value = item.comment;
 
-        editId = id;
+        editId = item.id;
         reporterField.focus();
     }
 });
@@ -148,15 +243,52 @@ function filterByTag(tag){
     render(filtered);
 }
 
-function filterByCriticality(criticality){
-    if (!criticality){
+document.querySelectorAll("th[data-field]").forEach(header => {
+    header.style.cursor = "pointer";
+
+    header.addEventListener("click", function () {
+        const field = this.dataset.field;
+
+        if (currentSortField === field) {
+            currentSortAsc = !currentSortAsc;
+        } else {
+            currentSortField = field;
+            currentSortAsc = true;
+        }
+
+        incidents.sort((a, b) => {
+
+            if (field === "date") {
+                return currentSortAsc
+                    ? new Date(a.date) - new Date(b.date)
+                    : new Date(b.date) - new Date(a.date);
+            }
+
+            if (field === "criticality") {
+                const aValue = criticalityOrder[a.criticality] || 0;
+                const bValue = criticalityOrder[b.criticality] || 0;
+
+                return currentSortAsc
+                    ? aValue - bValue
+                    : bValue - aValue;
+            }
+
+            if (field === "tag") {
+                return currentSortAsc
+                    ? a.tag.localeCompare(b.tag)
+                    : b.tag.localeCompare(a.tag);
+            }
+
+            return 0;
+        });
+
+        document.querySelectorAll("th[data-field] span")
+            .forEach(span => span.textContent = "⬍");
+
+        this.querySelector("span").textContent =
+            currentSortAsc ? "↑" : "↓";
+
         render();
-        return;
-    }
-
-    const filtered = incidents.filter (i => i.criticality === criticality);
-    render(filtered);
-}
-
-
-render();
+    });
+});
+loadIncidents();
