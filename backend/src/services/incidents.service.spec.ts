@@ -44,7 +44,7 @@ describe("IncidentsService", () => {
     
     const result = service.getAll({ page: "1", pageSize: "1" });
     expect(result.items.length).toBe(1);
-    expect(result.total).toBe(2);
+    expect(result.meta.totalItems).toBe(2);
   });
 
   it("should sort items by date", () => {

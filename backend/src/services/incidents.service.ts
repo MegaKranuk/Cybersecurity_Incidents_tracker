@@ -52,10 +52,16 @@ export class IncidentsService {
     const page = Number(query.page) || 1;
     const pageSize = Number(query.pageSize) || data.length;
     const start = (page - 1) * pageSize;
+    const total = data.length;
 
     return {
       items: data.slice(start, start + pageSize),
-      total: data.length,
+      meta:{
+        totalItems: total,
+        currentPage: page,
+        pageSize: pageSize,
+        totalPages: Math.ceil(total/pageSize)
+      }
     };
   }
 
