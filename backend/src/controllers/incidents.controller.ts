@@ -1,53 +1,37 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { IncidentsService } from "../services/incidents.service";
-import { IncidentResponseDto } from "../dtos/incidents.dto";
 
 export class IncidentsController {
   constructor(private service: IncidentsService) {}
 
-  getAll = (req: Request, res: Response) => {
-      const query = {
-        tag: typeof req.query.tag === "string" ? req.query.tag : undefined,
-        criticality:
-          typeof req.query.criticality === "string"
-            ? req.query.criticality
-            : undefined,
-        sortBy:
-          typeof req.query.sortBy === "string"
-            ? (req.query.sortBy as keyof IncidentResponseDto)
-            : undefined,
-        sortDir:
-          typeof req.query.sortDir === "string"
-            ? (req.query.sortDir as "asc" | "desc")
-            : undefined,
-        page:
-          typeof req.query.page === "string"
-            ? req.query.page
-            : undefined,
-        pageSize:
-          typeof req.query.pageSize === "string"
-            ? req.query.pageSize
-            : undefined,
-      };
-
-      res.json(this.service.getAll(query));
-    };
-
-  getById = (req: Request, res: Response) => {
-    res.json(this.service.getById(String(req.params.id)));
+  getAll = async (req: Request, res: Response, next: NextFunction) => {
+    try { res.json(await this.service.getAll(req.query)); } catch (e) { next(e); }
   };
 
-  create = (req: Request, res: Response) => {
-    const created = this.service.create(req.body);
-    res.status(201).json(created);
+  getById = async (req: Request, res: Response, next: NextFunction) => {
+    try { res.json(await this.service.getById(String(req.params.id))); } catch (e) { next(e); }
   };
 
-  update = (req: Request, res: Response) => {
-    res.json(this.service.update(String(req.params.id), req.body));
+  create = async (req: Request, res: Response, next: NextFunction) => {
+    try { res.status(201).json(await this.service.create(req.body)); } catch (e) { next(e); }
   };
 
-  delete = (req: Request, res: Response) => {
-    this.service.delete(String(req.params.id));
-    res.status(204).send();
+  update = async (req: Request, res: Response, next: NextFunction) => {
+    try { res.json(await this.service.update(String(req.params.id), req.body)); } catch (e) { next(e); }
+  };
+
+  delete = async (req: Request, res: Response, next: NextFunction) => {
+    try { 
+      await this.service.delete(String(req.params.id)); 
+      res.status(204).send(); 
+    } catch (e) { next(e); }
+  };
+
+  getStats = async (req: Request, res: Response, next: NextFunction) => {
+    try { res.json({ data: await this.service.getStats() }); } catch (e) { next(e); }
+  };
+
+  searchVulnerable = async (req: Request, res: Response, next: NextFunction) => {
+    try { res.json({ data: await this.service.searchVulnerable(String(req.query.q)) }); } catch (e) { next(e); }
   };
 }

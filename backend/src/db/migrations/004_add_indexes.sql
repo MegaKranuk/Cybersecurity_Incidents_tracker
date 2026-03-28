@@ -1,0 +1,1 @@
+CREATE INDEX idx_incidents_date ON Incidents(date);

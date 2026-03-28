@@ -1,10 +1,6 @@
 import { ApiError } from "../errors/api-error";
 import { IncidentsRepository } from "../repositories/incidents.repository";
-import {
-  CreateIncidentRequestDto,
-  UpdateIncidentRequestDto,
-  IncidentResponseDto
-} from "../dtos/incidents.dto";
+import { CreateIncidentRequestDto, UpdateIncidentRequestDto, IncidentResponseDto } from "../dtos/incidents.dto";
 
 interface IncidentQuery {
   tag?: string;
@@ -26,9 +22,8 @@ const allowedCriticality = [
 export class IncidentsService {
   constructor(private repo: IncidentsRepository) {}
 
-
-  getAll(query: IncidentQuery) {
-    let data = this.repo.findAll();
+  async getAll(query: IncidentQuery) {
+    let data = await this.repo.findAll();
 
     if (query.tag) {
       data = data.filter((i) => i.tag === query.tag);
@@ -50,7 +45,7 @@ export class IncidentsService {
     }
 
     const page = Number(query.page) || 1;
-    const pageSize = Number(query.pageSize) || data.length;
+    const pageSize = Number(query.pageSize) || data.length || 1;
     const start = (page - 1) * pageSize;
     const total = data.length;
 
@@ -65,29 +60,41 @@ export class IncidentsService {
     };
   }
 
-  getById(id: string) {
-    const incident = this.repo.findById(id);
-    if (!incident)
-      throw new ApiError(404, "NOT_FOUND", "Incident not found");
+  async getById(id: string) {
+    const incident = await this.repo.findById(id);
+    if (!incident) throw new ApiError(404, "NOT_FOUND", "Incident not found");
     return incident;
   }
 
-  create(dto: CreateIncidentRequestDto) {
+  async create(dto: CreateIncidentRequestDto) {
     this.validate(dto);
-    return this.repo.create(dto);
+    try {
+      return await this.repo.create(dto);
+    } catch (err: any) {
+      if (err.message && err.message.includes("UNIQUE constraint")) {
+        throw new ApiError(409, "CONFLICT", "Data conflict");
+      }
+      throw err;
+    }
   }
 
-  update(id: string, dto: UpdateIncidentRequestDto) {
-    const updated = this.repo.update(id, dto);
-    if (!updated)
-      throw new ApiError(404, "NOT_FOUND", "Incident not found");
+  async update(id: string, dto: UpdateIncidentRequestDto) {
+    const updated = await this.repo.update(id, dto);
+    if (!updated) throw new ApiError(404, "NOT_FOUND", "Incident not found");
     return updated;
   }
 
-  delete(id: string) {
-    const deleted = this.repo.delete(id);
-    if (!deleted)
-      throw new ApiError(404, "NOT_FOUND", "Incident not found");
+  async delete(id: string) {
+    const deleted = await this.repo.delete(id);
+    if (!deleted) throw new ApiError(404, "NOT_FOUND", "Incident not found");
+  }
+
+  async getStats() {
+    return await this.repo.getStats();
+  }
+
+  async searchVulnerable(q: string) {
+    return await this.repo.searchVulnerable(q);
   }
 
   private validate(dto: CreateIncidentRequestDto) {
