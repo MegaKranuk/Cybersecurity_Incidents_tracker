@@ -10,8 +10,13 @@ const service = new IncidentsService(repo);
 const controller = new IncidentsController(service);
 
 router.get("/", controller.getAll);
+
 router.get("/stats", controller.getStats);
 router.get("/search-vulnerable", controller.searchVulnerable); 
+
+router.get("/export", controller.exportIncidents);
+router.post("/import", controller.importIncidents);
+
 router.get("/:id", controller.getById);
 router.post("/", controller.create);
 router.put("/:id", controller.update);
