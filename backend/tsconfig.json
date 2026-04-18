@@ -3,6 +3,7 @@
     "resolveJsonModule": true,
     "target": "ES2020",
     "module": "CommonJS",
+    "types": ["jest", "node"],
     "rootDir": "./src",
     "outDir": "./dist",
     "strict": true,

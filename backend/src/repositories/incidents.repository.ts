@@ -7,6 +7,7 @@ export class IncidentsRepository {
     return await all<IncidentResponseDto>(`
       SELECT 
         i.id, i.date, i.tag, i.criticality,
+        r.id as reporterId,
         r.name as reporter,
         c.text as comment
       FROM Incidents i
@@ -20,6 +21,7 @@ export class IncidentsRepository {
     const row = await get<IncidentResponseDto>(`
       SELECT 
         i.id, i.date, i.tag, i.criticality,
+        r.id as reporterId,
         r.name as reporter,
         c.text as comment
       FROM Incidents i
@@ -104,5 +106,23 @@ async searchVulnerable(query: string) {
     ORDER BY date DESC 
     LIMIT 5
   `);
+}
+
+async getMostFrequent(): Promise<{ tag: string; incidentCount: number;} [] | null> {
+  const rows = await all<{ tag: string; incidentCount: number}>(`
+    SELECT tag, COUNT(*) as incidentCount
+    FROM Incidents
+    GROUP BY tag
+    ORDER BY incidentCount DESC
+    LIMIT 3
+  `);
+  return rows || null;
+}
+
+async deleteReporter (reporterId: string): Promise <boolean>{
+  await run('DELETE FROM Incidents WHERE reporterId = ?', [reporterId]);
+  const result = await run('DELETE FROM Reporters WHERE id = ?', [reporterId]);
+
+  return result.changes > 0;
 }
 }

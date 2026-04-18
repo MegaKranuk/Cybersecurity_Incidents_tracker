@@ -76,13 +76,40 @@ async function updateIncident(id, incident) {
   await loadIncidents();
 }
 
-async function deleteIncident(id) {
-  await fetch(`http://localhost:3000/api/incidents/${id}`, {
+async function deleteReporter(reporterId) {
+  const res = await fetch(`http://localhost:3000/api/incidents/reporters/${reporterId}`, {
     method: "DELETE"
   });
 
+  if (!res.ok) {
+    console.error("Помилка видалення репортера");
+  }
+
   await loadIncidents();
 }
+
+tableBody.addEventListener("click", async function(e){
+    const id = e.target.dataset.id; 
+    if (!id) return;
+
+    if (e.target.classList.contains("deleteBtn")){
+        const reporterId = e.target.dataset.reporterId;
+        await deleteReporter(reporterId); 
+    }
+
+    if (e.target.classList.contains("editBtn")){
+        const item = incidents.find(i => i.id == id); 
+
+        dateField.value = item.date;
+        tagField.value = item.tag;
+        criticalityField.value = item.criticality;
+        reporterField.value = item.reporter;
+        commentField.value = item.comment;
+
+        editId = item.id;
+        reporterField.focus();
+    }
+});
 
 function sanitize(str) {
     return str
@@ -113,8 +140,8 @@ function render(list = incidents){
             <td>${sanitize (incident.reporter)}</td>
             <td>${sanitize (incident.comment)}</td>
             <td>
-                <button data-id = "${incident.id}" class = "editBtn">Редагувати</button>
-                <button data-id = "${incident.id}" class = "deleteBtn">Видалити</button>
+                <button data-id="${incident.id}" class="editBtn">Редагувати</button>
+                <button data-id="${incident.id}" data-reporter-id="${incident.reporterId}" class="deleteBtn">Видалити</button>
             </td>
         </tr>
         `; 
@@ -210,43 +237,6 @@ form.addEventListener("submit", async function(e){
         submitBtn.innerText = originalText;
     }
 });
-
-tableBody.addEventListener("click", async function(e){
-    const id = e.target.dataset.id; 
-    if (!id) return;
-
-    if (e.target.classList.contains("deleteBtn")){
-        await deleteIncident(id); 
-    }
-
-    if (e.target.classList.contains("editBtn")){
-        const item = incidents.find(i => i.id == id); 
-
-        dateField.value = item.date;
-        tagField.value = item.tag;
-        criticalityField.value = item.criticality;
-        reporterField.value = item.reporter;
-        commentField.value = item.comment;
-
-        editId = item.id;
-        reporterField.focus();
-    }
-});
-
-function sortByDate() {
-    incidents.sort((a, b) => new Date (a.date) - new Date (b.date));
-    render();
-}
-
-function filterByTag(tag){
-    if (!tag){
-        render();
-        return;
-    }
-
-    const filtered = incidents.filter (i => i.tag === tag);
-    render(filtered);
-}
 
 document.querySelectorAll("th[data-field]").forEach(header => {
     header.style.cursor = "pointer";

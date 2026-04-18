@@ -68,4 +68,15 @@ export class IncidentsController {
       });
     } catch (e) { next(e); }
   };
+
+  deleteReporter = async (req: Request, res: Response, next: NextFunction) => {
+    try { 
+      await this.service.deleteReporter(String(req.params.id)); 
+      res.status(204).send(); 
+    } catch (e) { next(e); }
+  };
+
+  getMostFrequent = async (req: Request, res: Response, next: NextFunction) => {
+    try { res.json({ data: await this.service.getMostFrequent() }); } catch (e) { next(e); }
+  };
 }

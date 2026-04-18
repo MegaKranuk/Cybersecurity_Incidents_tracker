@@ -17,6 +17,9 @@ router.get("/search-vulnerable", controller.searchVulnerable);
 router.get("/export", controller.exportIncidents);
 router.post("/import", controller.importIncidents);
 
+router.delete("/reporters/:id", controller.deleteReporter);
+
+router.get("/most-frequent", controller.getMostFrequent);
 router.get("/:id", controller.getById);
 router.post("/", controller.create);
 router.put("/:id", controller.update);
