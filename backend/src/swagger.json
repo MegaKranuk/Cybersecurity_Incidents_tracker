@@ -3,49 +3,90 @@
   "info": {
     "title": "Cybersecurity Incident Tracker API",
     "version": "1.0.0",
-    "description": "Документація API для лабораторної роботи №2 (Андрій Нижник)"
+    "description": "Документація API"
   },
-  "servers": [{ "url": "http://localhost:3000" }],
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
   "paths": {
-    "/api/incidents": {
+    "/api/v1/incidents": {
       "get": {
         "summary": "Отримати список інцидентів",
         "parameters": [
-          { "name": "tag", "in": "query", "schema": { "type": "string" }, "description": "Фільтр за типом" },
-          { "name": "sortBy", "in": "query", "schema": { "type": "string" }, "description": "Сортування (напр. date)" },
-          { "name": "Criticality", "in": "query", "schema": { "type": "string"}, "description": "Фільтр за критичністю" },
-          { "name": "sortDir", "in": "query", "schema": { "type": "string", "enum":["asc", "desc"] }, "description": "Напрямок сортування" },
-          { "name": "page", "in": "query", "schema": { "type": "string", "default": "1" }, "description": "Номер сторінки" },
-          { "name": "pageSize", "in": "query", "schema": { "type": "string", "default": "1" }, "description": "К-сть елементів на сторінці" }
+          {
+            "name": "tag",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Фільтр за типом"
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Сортування (напр. date)"
+          },
+          {
+            "name": "criticality",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Фільтр за критичністю"
+          },
+          {
+            "name": "sortDir",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["asc", "desc"]
+            },
+            "description": "Напрямок сортування"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "1"
+            },
+            "description": "Номер сторінки"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "1"
+            },
+            "description": "К-сть елементів на сторінці"
+          }
         ],
-        "responses": 
-        { "200": 
-          { "description": "Успіх",
-            "content":
-            {
-            "application/json":
-              {
-                "schema":
-                {
-                  "type":"object",
-                  "properties":
-                  {
-                    "items": {"type": "array", "items": {"type": "object"}},
-                    "meta": 
-                    {
-                      "type":"object",
-                      "properties":{
-                        "totalItems": {"type": "number", "example": 15},
-                        "currentPage": {"type": "number", "example": 1},
-                        "pageSize": {"type": "number", "example": 10},
-                        "totalPage": {"type": "number", "example": 2}
+        "responses": {
+          "200": {
+            "description": "Успіх",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": { "type": "object" }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "totalItems": { "type": "number", "example": 15 },
+                        "currentPage": { "type": "number", "example": 1 },
+                        "pageSize": { "type": "number", "example": 10 },
+                        "totalPages": { "type": "number", "example": 2 }
                       }
                     }
                   }
                 }
               }
-            } 
-          } 
+            }
+          }
         }
       },
       "post": {
@@ -67,7 +108,10 @@
             }
           }
         },
-        "responses": { "201": { "description": "Створено" }, "400": { "description": "Помилка валідації" } }
+        "responses": {
+          "201": { "description": "Створено" },
+          "400": { "description": "Помилка валідації" }
+        }
       }
     }
   }

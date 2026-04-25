@@ -1,110 +1,149 @@
 <!DOCTYPE html>
-
 <html lang="uk">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css"/>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;600&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <script src="app.js" defer></script>
-    <title>Трекер інцидентів кібербезпеки</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;600&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <script type="module" src="/src/main.ts"></script>
+  <title>Трекер інцидентів кібербезпеки</title>
 </head>
-
 <body>
-    <header>
-        <h1>Кіберзагрози</h1>
-        <span id="warning">
-            <noscript>Будь ласка, ввімкніть оптимізацію JavaScript </noscript>
-        </span>
-    </header>
-    <main>
-        <div class="container">
-            <section>
-                <h2>Додати загрозу</h2>
-                <form id="createForm" novalidate>
-                    <div class="field">
-                        <label for="dateInput">Дата виявлення</label>
-                        <input id="dateInput" name="date" type="date" required>
-                        <p class="error-text" id="dateError"></p>
-                    </div>
+  <header>
+    <h1>Кіберзагрози</h1>
+    <span id="warning"><noscript>Будь ласка, ввімкніть JavaScript</noscript></span>
+  </header>
 
-                    <div class="field">
-                        <label for="tagSelect">Тип інциденту</label>
-                        <select id="tagSelect" name="tag"  required>
-                            <option value="">...</option>
-                            <option value="Шкідливе ПЗ">Шкідливе ПЗ</option>
-                            <option value="Фішинг">Фішинг</option>
-                            <option value="DDoS-атака">DDoS-атака</option>
-                            <option value="Вірус-вимагач">Вірус-вимагач</option>
-                            <option value="Троян">Троян</option>
-                            <option value="SQL/XSS">Атака на вебзастосунки (SQL/XSS)</option>
-                        </select>
-                            <p class="error-text" id="tagError"></p>
-                    </div>
+  <div id="notice" class="notice" role="status" aria-live="polite"></div>
 
-                    <div class="field">
-                        <label for="criticalitySelect">Критичність</label>
-                        <select id="criticalitySelect" name="criticality" required>
-                            <option value="">...</option>
-                            <option value="Низька критичність">Низька критичність</option>
-                            <option value="Трохи критично">Трохи критично</option>
-                            <option value="Середня критичність">Середня критичність</option>
-                            <option value="Відчутна критичність">Відчутна критичність</option>
-                            <option value="Дуже критично">Дуже критично</option>
-                        </select>
-                            <p class="error-text" id="criticalityError"></p>
-                    </div>
-
-                    <div class="field">
-                        <label for="reporterInput">Хто повідомив</label>
-                        <input id="reporterInput" name="reporter" type="text" placeholder="Ваше ім'я" required minlength="5" maxlength="15"/>
-                        <p class="error-text" id="reporterError"></p>
-                    </div>
-
-                    <div class="field">
-                        <label for="commentInput">Опис інциденту</label>
-                        <textarea id="commentInput" name="description" rows="4" placeholder="Деталі події..." minlength="15" maxlength="50" required></textarea>
-                        <p class="error-text" id="commentError"></p>
-                    </div>
-                    <div class="buttons">
-                        <button type="submit">Відправити інформацію</button>
-                        <button type="reset" id="resetBtn">Скинути</button>
-                    </div>
-                </form>
-            </section>
-            <section id="list-section">
-                <h2>Список інцидентів</h2>   
-                <table id="itemsTable">
-                    <caption>Зареєстровані кіберінциденти</caption>
-                    <thead>
-                        <tr>
-                            <th>Порядковий номер</th>                        
-                            <th data-field="date">Дата <span>⬍</span></th>
-                            <th data-field="tag">Тип <span>⬍</span></th>
-                            <th data-field="criticality">Критичність <span>⬍</span></th>
-                            <th>Репортер</th>
-                            <th>Опис</th>
-                        </tr>
-                    </thead>                   
-                    <tbody id="itemsTableBody">
-                    </tbody>
-                </table>
-            </section>
+  <main>
+    <div class="container">
+      <section class="section-form">
+        <h2>Додати загрозу</h2>
+        <form id="createForm" novalidate>
+          <div class="field">
+            <label for="dateInput">Дата виявлення</label>
+            <input id="dateInput" name="date" type="date" required>
+            <p class="error-text" id="dateError"></p>
+          </div>
+          <div class="field">
+            <label for="tagSelect">Тип інциденту</label>
+            <select id="tagSelect" name="tag" required>
+              <option value="">...</option>
+              <option value="Шкідливе ПЗ">Шкідливе ПЗ</option>
+              <option value="Фішинг">Фішинг</option>
+              <option value="DDoS-атака">DDoS-атака</option>
+              <option value="Вірус-вимагач">Вірус-вимагач</option>
+              <option value="Троян">Троян</option>
+              <option value="SQL/XSS">Атака на вебзастосунки (SQL/XSS)</option>
+            </select>
+            <p class="error-text" id="tagError"></p>
+          </div>
+          <div class="field">
+            <label for="criticalitySelect">Критичність</label>
+            <select id="criticalitySelect" name="criticality" required>
+              <option value="">...</option>
+              <option value="Низька критичність">Низька критичність</option>
+              <option value="Трохи критично">Трохи критично</option>
+              <option value="Середня критичність">Середня критичність</option>
+              <option value="Відчутна критичність">Відчутна критичність</option>
+              <option value="Дуже критично">Дуже критично</option>
+            </select>
+            <p class="error-text" id="criticalityError"></p>
+          </div>
+          <div class="field">
+            <label for="reporterInput">Хто повідомив</label>
+            <input id="reporterInput" name="reporter" type="text"
+                   placeholder="Ваше ім'я" required minlength="5" maxlength="15"/>
+            <p class="error-text" id="reporterError"></p>
+          </div>
+          <div class="field">
+            <label for="commentInput">Опис інциденту</label>
+            <textarea id="commentInput" name="comment" rows="4"
+                      placeholder="Деталі події..." minlength="15" maxlength="200" required></textarea>
+            <p class="error-text" id="commentError"></p>
+          </div>
+          <div class="buttons">
+            <button type="submit">Відправити інформацію</button>
+            <button type="reset" id="resetBtn">Скинути</button>
+          </div>
+        </form>
+      </section>
+      <section class="section-list" id="list-section">
+        <h2>Список інцидентів</h2>
+        <div class="filters">
+          <div class="filter-group">
+            <label for="filterTag">Тип</label>
+            <select id="filterTag">
+              <option value="">Всі типи</option>
+              <option value="Шкідливе ПЗ">Шкідливе ПЗ</option>
+              <option value="Фішинг">Фішинг</option>
+              <option value="DDoS-атака">DDoS-атака</option>
+              <option value="Вірус-вимагач">Вірус-вимагач</option>
+              <option value="Троян">Троян</option>
+              <option value="SQL/XSS">SQL/XSS</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="filterCriticality">Критичність</label>
+            <select id="filterCriticality">
+              <option value="">Всі рівні</option>
+              <option value="Низька критичність">Низька критичність</option>
+              <option value="Трохи критично">Трохи критично</option>
+              <option value="Середня критичність">Середня критичність</option>
+              <option value="Відчутна критичність">Відчутна критичність</option>
+              <option value="Дуже критично">Дуже критично</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="filterPageSize">На сторінці</label>
+            <select id="filterPageSize">
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+          <button id="clearFilters" class="btn-clear">✕ Скинути фільтри</button>
+          <span id="cacheLabel" class="cache-label"></span>
         </div>
-    </main>
-    <footer>
-        <address>Holy Kaharlyk Empire</address>
-        <h4><a href="https://github.com/MegaKranuk" target="_blank" >Author</a></h4>
-        <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank">
-            <img id="avatar" src="images/author.jpg"  width="100px" alt="MegaKranuk photo">
-        </a>
-        <div class="Support">
-            <h4>Support:</h4>
-            <p><a href="https://www.youtube.com/watch?v=SKKgX8Rlz6s" target="_blank">Yurii Klinskih</a></p>
-            <p><a href="https://www.youtube.com/watch?v=rCYVN_sYiiQ" target="_blank">Mikhail Gorshnev</a> </p>
-        </div>
-    </footer>
+
+        <div id="listStatus"></div>
+
+        <table id="itemsTable">
+          <caption>Зареєстровані кіберінциденти</caption>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th data-field="date">Дата <span>⬍</span></th>
+              <th data-field="tag">Тип <span>⬍</span></th>
+              <th data-field="criticality">Критичність <span>⬍</span></th>
+              <th>Репортер</th>
+              <th>Опис</th>
+              <th>Дії</th>
+            </tr>
+          </thead>
+          <tbody id="itemsTableBody"></tbody>
+        </table>
+        <div id="pagination" class="pagination"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer>
+    <address>Holy Kaharlyk Empire</address>
+    <h4><a href="https://github.com/MegaKranuk" target="_blank">Author</a></h4>
+    <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank">
+      <img id="avatar" src="../images/author.jpg" width="100px" alt="MegaKranuk photo">
+    </a>
+    <div class="Support">
+      <h4>Support:</h4>
+      <p><a href="https://www.youtube.com/watch?v=SKKgX8Rlz6s" target="_blank">Yurii Klinskih</a></p>
+      <p><a href="https://www.youtube.com/watch?v=rCYVN_sYiiQ" target="_blank">Mikhail Gorshnev</a></p>
+    </div>
+  </footer>
 </body>
 </html>
