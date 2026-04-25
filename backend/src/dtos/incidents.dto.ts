@@ -19,6 +19,7 @@ export interface IncidentResponseDto {
   date: string;
   tag: string;
   criticality: string;
+  reporterId: string;
   reporter: string;
   comment: string;
 }
