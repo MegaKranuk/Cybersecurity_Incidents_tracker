@@ -15,6 +15,7 @@ router.get("/stats", controller.getStats);
 router.get("/search-vulnerable", controller.searchVulnerable); 
 
 router.get("/export", controller.exportIncidents);
+router.get("/threat-stats",controller.getThreatStatsByTag);
 router.post("/import", controller.importIncidents);
 
 router.delete("/reporters/:id", controller.deleteReporter);

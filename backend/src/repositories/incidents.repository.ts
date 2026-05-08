@@ -99,30 +99,52 @@ export class IncidentsRepository {
     `);
   }
 
-async searchVulnerable(query: string) {
-  return await all(`
-    SELECT * FROM Incidents 
-    WHERE tag LIKE '%${query}%' 
-    ORDER BY date DESC 
-    LIMIT 5
-  `);
-}
+  async searchVulnerable(query: string) {
+    return await all(`
+      SELECT * FROM Incidents 
+      WHERE tag LIKE '%${query}%' 
+      ORDER BY date DESC 
+      LIMIT 5
+    `);
+  }
 
-async getMostFrequent(): Promise<{ tag: string; incidentCount: number;} [] | null> {
-  const rows = await all<{ tag: string; incidentCount: number}>(`
-    SELECT tag, COUNT(*) as incidentCount
-    FROM Incidents
-    GROUP BY tag
-    ORDER BY incidentCount DESC
-    LIMIT 3
-  `);
-  return rows || null;
-}
+  async getMostFrequent(): Promise<{ tag: string; incidentCount: number;} [] | null> {
+    const rows = await all<{ tag: string; incidentCount: number}>(`
+      SELECT tag, COUNT(*) as incidentCount
+      FROM Incidents
+      GROUP BY tag
+      ORDER BY incidentCount DESC
+      LIMIT 3
+    `);
+    return rows || null;
+  }
 
-async deleteReporter (reporterId: string): Promise <boolean>{
-  await run('DELETE FROM Incidents WHERE reporterId = ?', [reporterId]);
-  const result = await run('DELETE FROM Reporters WHERE id = ?', [reporterId]);
+  async getThreatStatsByTag(tag: string) {
+    return await all(`
+      SELECT
+        r.name as reporter,
+        i.criticality,
+        GROUP_CONCAT(c.text, '\n') as description
+      FROM Incidents i
+      JOIN Reporters r ON r.id = i.reporterId
+      LEFT JOIN Comments c ON c.incidentId = i.id
+      WHERE i.tag = '${escapeSql(tag)}'
+      GROUP BY i.criticality 
+      ORDER BY CASE i.criticality
+        WHEN 'Дуже критично' THEN 5
+        WHEN 'Відчутна критичність' THEN 4
+        WHEN 'Середня критичність' THEN 3
+        WHEN 'Трохи критично' THEN 2
+        WHEN 'Низька критичність' THEN 1
+        ELSE 0
+      END DESC
+    `);
+  }
 
-  return result.changes > 0;
-}
+  async deleteReporter (reporterId: string): Promise <boolean>{
+    await run('DELETE FROM Incidents WHERE reporterId = ?', [reporterId]);
+    const result = await run('DELETE FROM Reporters WHERE id = ?', [reporterId]);
+
+    return result.changes > 0;
+  }
 }

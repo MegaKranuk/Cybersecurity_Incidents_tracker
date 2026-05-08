@@ -42,8 +42,8 @@ app.use(errorHandler);
 async function bootstrap() {
   await migrate();
   app.listen(3000, () => {
-    console.log("API started on http://localhost:3000");
-    console.log("Swagger:        http://localhost:3000/api-docs");
+    console.log("API started on http://localhost:3000/api/v1/incidents");
+    console.log("Swagger: http://localhost:3000/api-docs");
   });
 }
 

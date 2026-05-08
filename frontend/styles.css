@@ -200,7 +200,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .buttons button,
 .editBtn,
 .deleteBtn,
-.sortBtn {
+.sortBtn, #loadThreatStats {
     font-family: 'Exo 2', sans-serif;
     border-radius: 4px;
     padding: 10px 20px;
@@ -212,7 +212,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.buttons button {
+.buttons button, #loadThreatStats {
     background-color: #00f2ff;
     color: #000;
 }
@@ -387,4 +387,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .section-list {
     flex: 1;
     min-width: 0;
+}
+
+.threat-form {
+    margin-top: 5%;
 }

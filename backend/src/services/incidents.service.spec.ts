@@ -11,8 +11,7 @@ describe("IncidentsService", () => {
     service = new IncidentsService(repo);
   });
 
-
-  it("should throw error if reporter is too short", () => {
+  it("should throw error if reporter is too short", async () => {
     const badDto = { 
       date: "2026-03-03", 
       reporter: "Дур",
@@ -20,10 +19,10 @@ describe("IncidentsService", () => {
       criticality: "Середня критичність", 
       tag: "Фішинг" 
     };
-    expect(() => service.create(badDto as any)).toThrow(ApiError);
+    await expect(service.create(badDto as any)).rejects.toThrow(ApiError);
   });
 
-    it("should throw error for invalid criticality", () => {
+  it("should throw error for invalid criticality", async () => {
     const badDto = { 
       date: "2026-03-03", 
       reporter: "Андрій", 
@@ -31,27 +30,31 @@ describe("IncidentsService", () => {
       criticality: "Ядерний рівень", 
       tag: "Фішинг" 
     };
-    
-    expect(() => service.create(badDto as any)).toThrow("Invalid request");
-    });
-  it("should throw 404 for non-existent id", () => {
-    expect(() => service.getById("123")).toThrow(ApiError);
+    await expect(service.create(badDto as any)).rejects.toThrow("Invalid request");
   });
 
-  it("should return correct items per page", () => {
-    service.create({ date: "2026-03-03", reporter: "Андрій Сергійович", comment: "Перший інцидент у системі", criticality: "Середня критичність", tag: "Фішинг" } as any);
-    service.create({ date: "2026-03-03", reporter: "Андрій Сергійович", comment: "Другий інцидент у системі", criticality: "Середня критичність", tag: "DDoS" } as any);
+  it("should throw 404 for non-existent id", async () => {
+    await expect(service.getById("123")).rejects.toThrow(ApiError);
+  });
+
+ it("should return correct items per page", async () => {
+    jest.spyOn(repo, "findAll").mockResolvedValue([
+      { date: "2026-03-03", reporter: "Андрій", tag: "Фішинг", criticality: "Середня критичність" },
+      { date: "2026-03-03", reporter: "Андрій", tag: "DDoS", criticality: "Середня критичність" }
+    ] as any);
+    const result = await service.getAll({ page: "1", pageSize: "1" });
     
-    const result = service.getAll({ page: "1", pageSize: "1" });
     expect(result.items.length).toBe(1);
     expect(result.meta.totalItems).toBe(2);
+
+    jest.restoreAllMocks();
   });
 
-  it("should sort items by date", () => {
-    service.create({ date: "2026-03-01", reporter: "Андрій Сергійович", comment: "Інцидент від першого числа", criticality: "Середня критичність", tag: "Фішинг" } as any);
-    service.create({ date: "2026-03-03", reporter: "Андрій Сергійович", comment: "Інцидент від третього числа", criticality: "Середня критичність", tag: "Фішинг" } as any);
+  it("should sort items by date", async () => {
+    await service.create({ date: "2026-03-01", reporter: "Андрій Сергійович", comment: "Інцидент від першого числа", criticality: "Середня критичність", tag: "Фішинг" } as any);
+    await service.create({ date: "2026-05-05", reporter: "Андрій Сергійович", comment: "Інцидент від третього числа", criticality: "Середня критичність", tag: "Фішинг" } as any);
     
-    const result = service.getAll({ sortBy: "date", sortDir: "desc" });
-    expect(result.items[0].date).toBe("2026-03-03");
+    const result = await service.getAll({ sortBy: "date", sortDir: "desc" });
+    expect(result.items[0].date).toBe("2026-05-05");
   });
 });

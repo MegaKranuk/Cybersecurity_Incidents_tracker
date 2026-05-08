@@ -76,6 +76,14 @@ export class IncidentsController {
     } catch (e) { next(e); }
   };
 
+  getThreatStatsByTag = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const tag = String(req.query.tag || "");
+      const data = await this.service.getThreatStatsByTag(tag);
+      res.json({ data });
+    } catch (e) { next(e);}
+  };
+
   getMostFrequent = async (req: Request, res: Response, next: NextFunction) => {
     try { res.json({ data: await this.service.getMostFrequent() }); } catch (e) { next(e); }
   };

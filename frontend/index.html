@@ -128,6 +128,32 @@
           <tbody id="itemsTableBody"></tbody>
         </table>
         <div id="pagination" class="pagination"></div>
+        <div class="threat-form">
+          <select id="threatTag">
+            <option value="">Виберіть тип інциденту</option>
+            <option value="Шкідливе ПЗ">Шкідливе ПЗ</option>
+            <option value="Фішинг">Фішинг</option>
+            <option value="DDoS-атака">DDoS-атака</option>
+            <option value="Вірус-вимагач">Вірус-вимагач</option>
+            <option value="Троян">Троян</option>
+            <option value="SQL/XSS">SQL/XSS</option>
+          </select>
+          <button id="loadThreatStats">Показати статистику</button>
+        </div>
+        <table id="threatStatsTable">
+          <thead>
+            <tr>
+              <th>Репортер</th>
+              <th>Критичність</th>
+              <th>Опис</th>
+            </tr>
+          </thead>
+          <tbody id="threatStatsBody">
+            <tr>
+              <td colspan="3">Дані не завантажені</td>
+            </tr>
+          </tbody>
+        </table>
       </section>
 
     </div>

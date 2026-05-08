@@ -117,6 +117,10 @@ export class IncidentsService {
     if (!deleted) throw new ApiError(404, "NOT_FOUND", "Репортера не знайдено");
   }
 
+  async getThreatStatsByTag(tag: string) {
+    return await this.repo.getThreatStatsByTag(tag);
+  }
+
   async getMostFrequent(){
     const result = await this.repo.getMostFrequent();
     if(!result) throw new ApiError (404, "NOT_FOUND", "Мало даних");

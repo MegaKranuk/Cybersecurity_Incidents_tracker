@@ -1,3 +1,5 @@
+import { getThreatStats } from "./apiClient";
+import { renderThreatStats } from "./ui";
 import { getIncidents, createIncident, updateIncident, deleteReporter } from "./apiClient";
 import { cacheGet, cacheSet, invalidateAll } from "./cache";
 import {
@@ -255,3 +257,14 @@ function readFormDto(): CreateIncidentDto {
   new Date().toISOString().split("T")[0];
 
 loadList();
+
+document.getElementById("loadThreatStats")
+  ?.addEventListener("click", async () => {
+    const tag = (
+      document.getElementById(
+        "threatTag"
+      ) as HTMLSelectElement).value;
+    if (!tag) return;
+    const result = await getThreatStats(tag);
+    renderThreatStats(result.data);
+  });

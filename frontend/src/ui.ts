@@ -132,3 +132,37 @@ export function showFieldError(fieldId: string, message: string): void {
   const el = document.getElementById(fieldId);
   if (el) el.textContent = message;
 }
+
+export function renderThreatStats(items: any[]) {
+  const tbody = document.getElementById("threatStatsBody") as HTMLElement;
+  tbody.innerHTML = "";
+  
+  if (!items || !items.length) {
+    tbody.innerHTML = `<tr><td colspan="3" >Немає даних</td> </tr>`;
+    return;
+  }
+  
+  items.forEach((item) => {
+    const listItemsHtml = item.description
+      .split('\n')
+      .filter((desc: string) => desc.trim() !== '')
+      .map((desc: string) => `<li>${sanitize(desc)}</li>`)
+      .join('');
+
+    tbody.innerHTML += `
+      <tr>
+        <td>
+          ${sanitize(item.reporter)}
+        </td>
+        <td>
+          ${sanitize(item.criticality)}
+        </td>
+        <td>
+          <ul style="margin: 0; padding-left: 20px; text-align: left;">
+            ${listItemsHtml}
+          </ul>
+        </td>
+      </tr>
+    `;
+  });
+}

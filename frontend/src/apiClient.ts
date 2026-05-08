@@ -132,3 +132,10 @@ export async function deleteIncident(id: string, signal?: AbortSignal): Promise<
 export async function deleteReporter(reporterId: string, signal?: AbortSignal): Promise<void> {
   return request<void>(`/incidents/reporters/${encodeURIComponent(reporterId)}`, { method: "DELETE" }, signal);
 }
+
+export async function getThreatStats(tag: string) {
+  return request<{ data: any[] }>(
+    `/incidents/threat-stats?tag=${encodeURIComponent(tag)}&_=${Date.now()}`,
+    { method: "GET" }
+  );
+}
