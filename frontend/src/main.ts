@@ -1,12 +1,6 @@
-import { getThreatStats } from "./apiClient";
-import { renderThreatStats } from "./ui";
-import { getIncidents, createIncident, updateIncident, deleteReporter } from "./apiClient";
+import { getThreatStats, getIncidents, createIncident, updateIncident, deleteReporter, authApi } from "./apiClient";
+import { renderThreatStats, renderListStatus, renderTable, renderPagination, setFormEnabled, clearFieldErrors, showFieldError, showNotice, showApiError } from "./ui";
 import { cacheGet, cacheSet, invalidateAll } from "./cache";
-import {
-  renderListStatus, renderTable, renderPagination,
-  setFormEnabled, clearFieldErrors, showFieldError,
-  showNotice, showApiError,
-} from "./ui";
 import type { ApiError, CreateIncidentDto } from "./dtos";
 import { toListItemViewModel } from "./dtos";
 
@@ -28,6 +22,7 @@ const state: ListState = {
   sortDir: "asc",
 };
 
+let isLoginMode = true;
 let editId: string | null = null;
 let activeLoadController: AbortController | null = null;
 
@@ -37,13 +32,13 @@ async function loadList(bustCache = false): Promise<void> {
   const signal = activeLoadController.signal;
 
   const params: Record<string, string> = {
-    page:     String(state.page),
+    page: String(state.page),
     pageSize: String(state.pageSize),
   };
-  if (state.tag)         params.tag         = state.tag;
+  if (state.tag) params.tag = state.tag;
   if (state.criticality) params.criticality = state.criticality;
-  if (state.sortBy)      params.sortBy      = state.sortBy;
-  if (state.sortBy)      params.sortDir     = state.sortDir;
+  if (state.sortBy) params.sortBy = state.sortBy;
+  if (state.sortBy) params.sortDir = state.sortDir;
 
   const cacheKey = new URLSearchParams(params).toString();
 
@@ -90,10 +85,70 @@ function goToPage(page: number): void {
   loadList();
 }
 
+function checkAuth() {
+  const token = localStorage.getItem("jwt_token");
+  const authSection = document.getElementById("authSection");
+  const appContent = document.getElementById("appContent");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  if (authSection) {
+    authSection.style.display = token ? "none" : "flex";
+  }
+  if (appContent) {
+    appContent.style.display = token ? "block" : "none";
+  }
+  if (logoutBtn) {
+    logoutBtn.style.display = token ? "block" : "none";
+  }
+
+  if (token) {
+    loadList();
+  }
+}
+
 function showCacheLabel(fromCache: boolean): void {
   const el = document.getElementById("cacheLabel");
   if (el) el.textContent = fromCache ? "⚡ з кешу" : "";
 }
+
+document.getElementById("authForm")?.addEventListener("submit", async (e: Event) => {
+  e.preventDefault();
+  const nameInput = document.getElementById("authName") as HTMLInputElement;
+  const passInput = document.getElementById("authPassword") as HTMLInputElement;
+  
+  const name = nameInput ? nameInput.value : "";
+  const pass = passInput ? passInput.value : "";
+
+  try {
+    if (isLoginMode) {
+      await authApi.login(name, pass);
+      showNotice("Вітаємо у системі!");
+    } else {
+      await authApi.register(name, pass);
+      showNotice("Аккаунт створено. Тепер увійдіть.");
+      isLoginMode = true;
+      document.getElementById("toggleMode")?.click();
+      return;
+    }
+    checkAuth();
+  } catch (err: any) {
+    showNotice(err.message || "Помилка автентифікації", true);
+  }
+});
+
+document.getElementById("toggleMode")?.addEventListener("click", () => {
+  isLoginMode = !isLoginMode;
+  const title = document.getElementById("authTitle");
+  const btn = document.getElementById("authBtn");
+  if (title) title.textContent = isLoginMode ? "Вхід у систему" : "Реєстрація";
+  if (btn) btn.textContent = isLoginMode ? "Увійти" : "Створити аккаунт";
+});
+
+document.getElementById("logoutBtn")?.addEventListener("click", () => {
+  authApi.logout();
+});
+
+window.addEventListener("auth_failed", () => checkAuth());
 
 document.getElementById("filterTag")?.addEventListener("change", (e) => {
   state.tag = (e.target as HTMLSelectElement).value;
@@ -117,8 +172,10 @@ document.getElementById("clearFilters")?.addEventListener("click", () => {
   state.tag = "";
   state.criticality = "";
   state.page = 1;
-  (document.getElementById("filterTag") as HTMLSelectElement).value = "";
-  (document.getElementById("filterCriticality") as HTMLSelectElement).value = "";
+  const tagEl = document.getElementById("filterTag") as HTMLSelectElement;
+  const critEl = document.getElementById("filterCriticality") as HTMLSelectElement;
+  if (tagEl) tagEl.value = "";
+  if (critEl) critEl.value = "";
   loadList();
 });
 
@@ -142,9 +199,9 @@ document.querySelectorAll<HTMLElement>("th[data-field]").forEach((th) => {
   });
 });
 
-const form = document.getElementById("createForm") as HTMLFormElement;
+const createForm = document.getElementById("createForm") as HTMLFormElement;
 
-form.addEventListener("submit", async (e) => {
+createForm?.addEventListener("submit", async (e: Event) => {
   e.preventDefault();
   if (!validateForm()) return;
 
@@ -162,7 +219,7 @@ form.addEventListener("submit", async (e) => {
       showNotice("Інцидент додано");
     }
     invalidateAll();
-    form.reset();
+    createForm.reset();
     state.page = 1;
     await loadList(true);
   } catch (err: unknown) {
@@ -170,11 +227,11 @@ form.addEventListener("submit", async (e) => {
     showApiError(apiErr);
     if (Array.isArray(apiErr.details)) {
       (apiErr.details as string[]).forEach((msg) => {
-        if (msg.includes("Date"))        showFieldError("dateError", msg);
+        if (msg.includes("Date")) showFieldError("dateError", msg);
         else if (msg.includes("Reporter")) showFieldError("reporterError", msg);
         else if (msg.includes("Comment")) showFieldError("commentError", msg);
         else if (msg.includes("criticality")) showFieldError("criticalityError", msg);
-        else if (msg.includes("tag"))    showFieldError("tagError", msg);
+        else if (msg.includes("tag")) showFieldError("tagError", msg);
       });
     }
   } finally {
@@ -184,7 +241,7 @@ form.addEventListener("submit", async (e) => {
 
 const tableBody = document.getElementById("itemsTableBody") as HTMLTableSectionElement;
 
-tableBody.addEventListener("click", async (e) => {
+tableBody?.addEventListener("click", async (e) => {
   const target = e.target as HTMLElement;
   const id = target.dataset.id;
   if (!id) return;
@@ -209,14 +266,20 @@ tableBody.addEventListener("click", async (e) => {
     const cells = row.querySelectorAll("td");
     if (cells.length < 6) return;
 
-    (document.getElementById("dateInput") as HTMLInputElement).value         = cells[1].textContent ?? "";
-    (document.getElementById("tagSelect") as HTMLSelectElement).value        = cells[2].textContent ?? "";
-    (document.getElementById("criticalitySelect") as HTMLSelectElement).value = cells[3].textContent ?? "";
-    (document.getElementById("reporterInput") as HTMLInputElement).value     = cells[4].textContent ?? "";
-    (document.getElementById("commentInput") as HTMLTextAreaElement).value   = cells[5].textContent ?? "";
+    const dateInput = document.getElementById("dateInput") as HTMLInputElement;
+    const tagSelect = document.getElementById("tagSelect") as HTMLSelectElement;
+    const criticalitySelect = document.getElementById("criticalitySelect") as HTMLSelectElement;
+    const reporterInput = document.getElementById("reporterInput") as HTMLInputElement;
+    const commentInput = document.getElementById("commentInput") as HTMLTextAreaElement;
+
+    if (dateInput) dateInput.value = cells[1].textContent ?? "";
+    if (tagSelect) tagSelect.value = cells[2].textContent ?? "";
+    if (criticalitySelect) criticalitySelect.value = cells[3].textContent ?? "";
+    if (reporterInput) reporterInput.value = cells[4].textContent ?? "";
+    if (commentInput) commentInput.value = cells[5].textContent ?? "";
 
     editId = id;
-    (document.getElementById("reporterInput") as HTMLInputElement).focus();
+    if (reporterInput) reporterInput.focus();
     showNotice("✏️ Режим редагування");
   }
 });
@@ -229,42 +292,56 @@ document.getElementById("resetBtn")?.addEventListener("click", () => {
 function validateForm(): boolean {
   clearFieldErrors();
   let valid = true;
-  const date        = (document.getElementById("dateInput") as HTMLInputElement).value;
-  const tag         = (document.getElementById("tagSelect") as HTMLSelectElement).value;
-  const criticality = (document.getElementById("criticalitySelect") as HTMLSelectElement).value;
-  const reporter    = (document.getElementById("reporterInput") as HTMLInputElement).value;
-  const comment     = (document.getElementById("commentInput") as HTMLTextAreaElement).value;
+  
+  const dateInput = document.getElementById("dateInput") as HTMLInputElement;
+  const tagSelect = document.getElementById("tagSelect") as HTMLSelectElement;
+  const criticalitySelect = document.getElementById("criticalitySelect") as HTMLSelectElement;
+  const reporterInput = document.getElementById("reporterInput") as HTMLInputElement;
+  const commentInput = document.getElementById("commentInput") as HTMLTextAreaElement;
 
-  if (!date)               { showFieldError("dateError",        "Виберіть дату!");            valid = false; }
-  if (!tag)                { showFieldError("tagError",         "Виберіть тип!");             valid = false; }
-  if (!criticality)        { showFieldError("criticalityError", "Виберіть критичність!");     valid = false; }
-  if (reporter.length < 5) { showFieldError("reporterError",   "Ім'я мінімум 5 символів!"); valid = false; }
-  if (comment.length < 15) { showFieldError("commentError",    "Опис мінімум 15 символів!"); valid = false; }
+  const date = dateInput ? dateInput.value : "";
+  const tag = tagSelect ? tagSelect.value : "";
+  const criticality = criticalitySelect ? criticalitySelect.value : "";
+  const reporter = reporterInput ? reporterInput.value : "";
+  const comment = commentInput ? commentInput.value : "";
+
+  if (!date) { showFieldError("dateError", "Виберіть дату!"); valid = false; }
+  if (!tag) { showFieldError("tagError", "Виберіть тип!"); valid = false; }
+  if (!criticality) { showFieldError("criticalityError", "Виберіть критичність!"); valid = false; }
+  if (reporterInput && reporter.length < 5) { showFieldError("reporterError", "Ім'я мінімум 5 символів!"); valid = false; }
+  if (comment.length < 15) { showFieldError("commentError", "Опис мінімум 15 символів!"); valid = false; }
+  
   return valid;
 }
 
 function readFormDto(): CreateIncidentDto {
+  const dateInput = document.getElementById("dateInput") as HTMLInputElement;
+  const tagSelect = document.getElementById("tagSelect") as HTMLSelectElement;
+  const criticalitySelect = document.getElementById("criticalitySelect") as HTMLSelectElement;
+  const reporterInput = document.getElementById("reporterInput") as HTMLInputElement;
+  const commentInput = document.getElementById("commentInput") as HTMLTextAreaElement;
+
   return {
-    date:        (document.getElementById("dateInput") as HTMLInputElement).value,
-    tag:         (document.getElementById("tagSelect") as HTMLSelectElement).value,
-    criticality: (document.getElementById("criticalitySelect") as HTMLSelectElement).value,
-    reporter:    (document.getElementById("reporterInput") as HTMLInputElement).value,
-    comment:     (document.getElementById("commentInput") as HTMLTextAreaElement).value,
+    date: dateInput ? dateInput.value : "",
+    tag: tagSelect ? tagSelect.value : "",
+    criticality: criticalitySelect ? criticalitySelect.value : "",
+    reporter: reporterInput ? reporterInput.value : "",
+    comment: commentInput ? commentInput.value : "",
   };
 }
 
-(document.getElementById("dateInput") as HTMLInputElement).max =
-  new Date().toISOString().split("T")[0];
+const dInput = document.getElementById("dateInput") as HTMLInputElement;
+if (dInput) {
+  dInput.max = new Date().toISOString().split("T")[0];
+}
 
-loadList();
+document.getElementById("loadThreatStats")?.addEventListener("click", async () => {
+  const tagEl = document.getElementById("threatTag") as HTMLSelectElement;
+  if (!tagEl) return;
+  const tag = tagEl.value;
+  if (!tag) return;
+  const result = await getThreatStats(tag);
+  renderThreatStats(result.data);
+});
 
-document.getElementById("loadThreatStats")
-  ?.addEventListener("click", async () => {
-    const tag = (
-      document.getElementById(
-        "threatTag"
-      ) as HTMLSelectElement).value;
-    if (!tag) return;
-    const result = await getThreatStats(tag);
-    renderThreatStats(result.data);
-  });
+checkAuth();

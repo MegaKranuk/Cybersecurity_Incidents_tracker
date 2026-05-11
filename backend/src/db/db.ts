@@ -9,7 +9,7 @@ if (!fs.existsSync(dataDir)) {
 
 const dbPath = path.join(dataDir, "app.db");
 
-export const db = new (sqlite3.verbose()).Database(dbPath, (err) => {
+export const db = new (sqlite3.verbose()).Database(dbPath, (err: Error | null) => {
   if (err) {
     console.error("Failed to open SQLite DB:", err.message);
     process.exit(1);

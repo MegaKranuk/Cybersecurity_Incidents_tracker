@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { run, all, escapeSql } from "./dbClient";
+import { run, all } from "./dbClient";
 
 export async function migrate(): Promise<void> {
   await run("PRAGMA foreign_keys = ON;");
@@ -12,9 +12,12 @@ export async function migrate(): Promise<void> {
       appliedAt TEXT NOT NULL
     );
   `);
-
   const migrationsDir = path.join(__dirname, "migrations");
-  if (!fs.existsSync(migrationsDir)) fs.mkdirSync(migrationsDir);
+  
+  if (!fs.existsSync(migrationsDir)) {
+    console.warn(`Папка міграцій не знайдена: ${migrationsDir}`);
+    return;
+  }
 
   const files = fs
     .readdirSync(migrationsDir)
@@ -34,8 +37,14 @@ export async function migrate(): Promise<void> {
 
     try {
       await run(sql);
+      
       const now = new Date().toISOString();
-      await run(`INSERT INTO schema_migrations (filename, appliedAt) VALUES ('${escapeSql(file)}', '${now}');`);
+      
+      await run(
+        "INSERT INTO schema_migrations (filename, appliedAt) VALUES (?, ?);", 
+        [file, now]
+      );
+      
       console.log(`Migration applied: ${file}`);
     } catch (err) {
       console.error(`Error applying migration ${file}:`, err);

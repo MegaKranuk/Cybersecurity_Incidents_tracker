@@ -14,11 +14,31 @@
   <header>
     <h1>Кіберзагрози</h1>
     <span id="warning"><noscript>Будь ласка, ввімкніть JavaScript</noscript></span>
+    <span id="currentUserDisplay" style="margin-right: 15px; font-weight: bold;"></span>
   </header>
 
   <div id="notice" class="notice" role="status" aria-live="polite"></div>
 
   <main>
+    <section class="authSection" class="auth-overlay">
+      <div class="auth-card">
+        <h2 id="authTitle">Вхід у систему</h2>
+        <form id="authForm">
+          <div class="field">
+            <label>Логін</label>
+            <input type="text" id="authName" required>
+          </div>
+          <div class="field">
+            <label>Пароль</label>
+            <input type="password" id="authPassword" required>
+          </div>
+          <div class="buttons">
+            <button type="submit" id="authBtn">Увійти</button>
+            <button type="button" id="toggleMode">Створити аккаунт</button>
+          </div>
+        </form>
+      </div>
+    </section>
     <div class="container">
       <section class="section-form">
         <h2>Додати загрозу</h2>
@@ -52,12 +72,6 @@
               <option value="Дуже критично">Дуже критично</option>
             </select>
             <p class="error-text" id="criticalityError"></p>
-          </div>
-          <div class="field">
-            <label for="reporterInput">Хто повідомив</label>
-            <input id="reporterInput" name="reporter" type="text"
-                   placeholder="Ваше ім'я" required minlength="5" maxlength="15"/>
-            <p class="error-text" id="reporterError"></p>
           </div>
           <div class="field">
             <label for="commentInput">Опис інциденту</label>
@@ -109,9 +123,7 @@
           <button id="clearFilters" class="btn-clear">✕ Скинути фільтри</button>
           <span id="cacheLabel" class="cache-label"></span>
         </div>
-
         <div id="listStatus"></div>
-
         <table id="itemsTable">
           <caption>Зареєстровані кіберінциденти</caption>
           <thead>
@@ -155,10 +167,8 @@
           </tbody>
         </table>
       </section>
-
     </div>
   </main>
-
   <footer>
     <address>Holy Kaharlyk Empire</address>
     <h4><a href="https://github.com/MegaKranuk" target="_blank">Author</a></h4>

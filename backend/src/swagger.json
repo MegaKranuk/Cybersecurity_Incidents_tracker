@@ -10,6 +10,21 @@
       "url": "http://localhost:3000"
     }
   ],
+  "components": {
+    "securitySchemes": {
+      "DemoAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Demo-UserId",
+        "description": "Введіть user-001 для доступу"
+      }
+    }
+  },
+  "security": [
+    {
+      "DemoAuth": []
+    }
+  ],
   "paths": {
     "/api/v1/incidents": {
       "get": {
@@ -99,10 +114,10 @@
                 "type": "object",
                 "properties": {
                   "date": { "type": "string", "example": "2026-03-03" },
-                  "tag": { "type": "string" },
-                  "criticality": { "type": "string" },
-                  "reporter": { "type": "string" },
-                  "comment": { "type": "string" }
+                  "tag": { "type": "Троян" },
+                  "criticality": { "type": "Дуже критично" },
+                  "reporter": { "type": "Віталій Цаль" },
+                  "comment": { "type": "Вінницький герой асфальта" }
                 }
               }
             }

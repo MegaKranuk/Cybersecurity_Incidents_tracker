@@ -378,7 +378,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
  */
 
-.section-form {
+.section-form{
     min-width: 280px;
     max-width: 340px;
     flex-shrink: 0;
@@ -391,4 +391,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .threat-form {
     margin-top: 5%;
+}
+
+.authSection {
+    min-width: 280px;
+    max-width: 340px;
+    flex-shrink: 0;
 }
